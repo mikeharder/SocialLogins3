@@ -93,6 +93,13 @@ namespace SocialLogins3
                 AppSecret = Configuration["Authentication:Facebook:AppSecret"]
             });
 
+            app.UseOpenIdConnectAuthentication(new OpenIdConnectOptions()
+            {
+                ClientId = Configuration["Authentication:OpenIdConnect:ClientId"],
+                ClientSecret = Configuration["Authentication:OpenIdConnect:ClientSecret"],
+                Authority = Configuration["Authentication:OpenIdConnect:Authority"]
+            });
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
