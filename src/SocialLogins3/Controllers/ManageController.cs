@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SocialLogins3.Models;
 using SocialLogins3.Models.ManageViewModels;
 using SocialLogins3.Services;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SocialLogins3.Controllers
 {
@@ -16,6 +15,7 @@ namespace SocialLogins3.Controllers
     public class ManageController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ISmsSender _smsSender;
@@ -23,12 +23,14 @@ namespace SocialLogins3.Controllers
 
         public ManageController(
         UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager,
         SignInManager<ApplicationUser> signInManager,
         IEmailSender emailSender,
         ISmsSender smsSender,
         ILoggerFactory loggerFactory)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _smsSender = smsSender;
@@ -54,6 +56,31 @@ namespace SocialLogins3.Controllers
             {
                 return View("Error");
             }
+
+            var testRole1 = await _roleManager.FindByNameAsync("Test1");
+            if (testRole1 == null)
+            {
+                testRole1 = new IdentityRole("Test1");
+                await _roleManager.CreateAsync(testRole1);
+            }
+
+            var testRole2 = await _roleManager.FindByNameAsync("Test2");
+            if (testRole2 == null)
+            {
+                testRole2 = new IdentityRole("Test2");
+                await _roleManager.CreateAsync(testRole2);
+            }
+
+            if (!await _userManager.IsInRoleAsync(user, testRole1.Name) && user.UserName.Contains("1"))
+            {
+                await _userManager.AddToRoleAsync(user, testRole1.Name);
+            }
+
+            if (!await _userManager.IsInRoleAsync(user, testRole2.Name) && user.UserName.Contains("2"))
+            {
+                await _userManager.AddToRoleAsync(user, testRole2.Name);
+            }
+
             var model = new IndexViewModel
             {
                 HasPassword = await _userManager.HasPasswordAsync(user),
