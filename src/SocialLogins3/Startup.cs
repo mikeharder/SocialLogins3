@@ -100,6 +100,12 @@ namespace SocialLogins3
                 Authority = Configuration["Authentication:OpenIdConnect:Authority"]
             });
 
+            app.UseTwitterAuthentication(new TwitterOptions()
+            {
+                ConsumerKey = Configuration["Authentication:Twitter:ConsumerKey"],
+                ConsumerSecret = Configuration["Authentication:Twitter:ConsumerSecret"]
+            });
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
